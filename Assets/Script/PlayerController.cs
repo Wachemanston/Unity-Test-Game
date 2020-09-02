@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
+using Mirror;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     static readonly int WINNING_COUNT = 6;
 
     public float speed = 10.0f;
     public TextMeshProUGUI countText;
     public GameObject winTextObj;
+
+    public GameObject PickUp;
+    public GameObject PickUpGroup;
 
     private int count;
     private Rigidbody rb;
@@ -25,6 +29,8 @@ public class PlayerController : MonoBehaviour
         count = 0;
         SetCountText();
         winTextObj.SetActive(false);
+
+        NetworkClient.connection.identity.GetComponent<PlayerController>().CmdCreatePickUps();
     }
 
     void OnMove(InputValue movementValue)
@@ -59,5 +65,29 @@ public class PlayerController : MonoBehaviour
         {
             winTextObj.SetActive(true);
         }
+    }
+
+    Vector3 getRandomPos()
+    {
+        int range = 10;
+        return new Vector3(Random.Range(-range, range), 1, Random.Range(-range, range));
+    }
+
+    [Command]
+    public void CmdCreatePickUps()
+    {
+        for (int i = 0; i < WINNING_COUNT + 2; i++)
+        {
+            GameObject pickUp = Instantiate(PickUp, getRandomPos(), Quaternion.identity);
+            NetworkServer.Spawn(pickUp, connectionToClient);
+            RpcShowPickUps(pickUp);
+        }
+    }
+
+    [ClientRpc]
+    public void RpcShowPickUps(GameObject pickUp)
+    {
+        PickUpGroup = GameObject.Find("PickUpGroups");
+        pickUp.GetComponent<Transform>().SetParent(PickUpGroup.transform, false);
     }
 }
