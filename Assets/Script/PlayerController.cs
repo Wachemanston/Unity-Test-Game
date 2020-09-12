@@ -24,8 +24,6 @@ public class PlayerController : NetworkBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-
         count = 0;
         SetCountText();
         winTextObj.SetActive(false);
@@ -44,7 +42,9 @@ public class PlayerController : NetworkBehaviour
     void FixedUpdate()
     {
         Vector3 movement = new Vector3(movementX, 0.0f, movementY);
+        rb = NetworkClient.connection.identity.GetComponent<Rigidbody>();
         rb.AddForce(movement * speed);
+        RpcUpdatePlayersPos(NetworkClient.connection.identity.netId, movement * speed);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -60,7 +60,7 @@ public class PlayerController : NetworkBehaviour
 
     private void SetCountText()
     {
-        countText.text = "Count : " + count.ToString();
+        countText.text = "Count : " + NetworkClient.connection.identity.GetComponent<PlayerController>().count.ToString();
         if (count >= WINNING_COUNT)
         {
             winTextObj.SetActive(true);
@@ -72,7 +72,7 @@ public class PlayerController : NetworkBehaviour
         int range = 10;
         return new Vector3(Random.Range(-range, range), 1, Random.Range(-range, range));
     }
-
+    
     [Command]
     public void CmdCreatePickUps()
     {
@@ -83,11 +83,20 @@ public class PlayerController : NetworkBehaviour
             RpcShowPickUps(pickUp);
         }
     }
-
+    
     [ClientRpc]
     public void RpcShowPickUps(GameObject pickUp)
     {
         PickUpGroup = GameObject.Find("PickUpGroups");
         pickUp.GetComponent<Transform>().SetParent(PickUpGroup.transform, false);
+    }
+
+    [ClientRpc] // TODO: Update value from client to server
+    public void RpcUpdatePlayersPos(uint uid, Vector3 force)
+    {
+        if (NetworkIdentity.spawned.TryGetValue(uid, out NetworkIdentity identity))
+        {
+            identity.gameObject.GetComponent<Rigidbody>().AddForce(force);
+        }
     }
 }

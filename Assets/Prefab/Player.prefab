@@ -140,9 +140,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 484e487eb668c0c46ae2c7ba9c57e9b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   speed: 10
-  countText: {fileID: 0}
-  winTextObj: {fileID: 0}
+  countText: {fileID: 5312567883102959631, guid: a5a7893e6b3d1d643aeccf761a9bcc85,
+    type: 3}
+  winTextObj: {fileID: 8082359236124685149, guid: 7c4a5c5cdde7d7440aa655b5f7c513a1,
+    type: 3}
+  PickUp: {fileID: 423822113022187335, guid: de51ec3051df6b64e9c2e5718427c25f, type: 3}
+  PickUpGroup: {fileID: 6986641119924603071, guid: 543182720a8a6854483e22f5a0bb9f2b,
+    type: 3}
 --- !u!54 &4554593798696477173
 Rigidbody:
   m_ObjectHideFlags: 0
